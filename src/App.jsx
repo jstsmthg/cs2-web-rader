@@ -5,9 +5,24 @@ import './App.css'
 // CS:GO/CS2 map coordinates require scaling to fit 2D images.
 // Format: mapName: { scale: number, x: number, y: number }
 const MAP_CONFIGS = {
-  de_mirage: { scale: 5, x: -3230, y: 1713 },
-  de_dust2: { scale: 4.4, x: -2400, y: 3383 },
+  ar_baggage: { scale: 2.539062, x: -1316, y: 1288 },
+  ar_pool_day: { scale: 2.125, x: -1088, y: 1600 },
+  ar_shoots: { scale: 2.6875, x: -1368, y: 1952 },
+  cs_agency: { scale: 4.1817436, x: -2597.7368, y: 2079.3687 },
+  cs_italy: { scale: 4.6, x: -2647, y: 2592 },
+  cs_office: { scale: 4.1, x: -1838, y: 1858 },
+  de_ancient: { scale: 5, x: -2953, y: 2164 },
+  de_anubis: { scale: 5.22, x: -2796, y: 3328 },
+  de_brewery: { scale: 2.1820312, x: -4122.4, y: 4394.4 },
+  de_dust2: { scale: 4.4, x: -2476, y: 3239 },
+  de_grail: { scale: 2.1756864, x: -4395.903, y: 4203.903 },
   de_inferno: { scale: 4.9, x: -2087, y: 3870 },
+  de_jura: { scale: 2.504188, x: -2126.9092, y: 2389.8 },
+  de_mirage: { scale: 5, x: -3230, y: 1713 },
+  de_nuke: { scale: 7, x: -3453, y: 2887 },
+  de_overpass: { scale: 5.2, x: -4831, y: 1781 },
+  de_train: { scale: 4.082077, x: -2308, y: 2078 },
+  de_vertigo: { scale: 4, x: -3168, y: 1762 },
   default: { scale: 5, x: 0, y: 0 }
 };
 
