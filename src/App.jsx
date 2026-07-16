@@ -183,7 +183,7 @@ function App() {
 
   // Check if map image exists, otherwise fallback to generic
   // We can use a raw github repo for radar images:
-  const radarImageUrl = `https://raw.githubusercontent.com/CSGO-Analysis/csgo-maps-overviews/master/overviews/${radarData.map}_radar.png`;
+  const radarImageUrl = `https://raw.githubusercontent.com/2mlml/cs2-radar-images/master/${radarData.map}.png`;
 
   return (
     <div className="radar-container">
