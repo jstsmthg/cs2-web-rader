@@ -171,8 +171,8 @@ function App() {
   // --- Radar View ---
 
   // Check if map image exists, otherwise fallback to generic
-  // We can use a raw github repo for radar images, e.g.:
-  const radarImageUrl = `https://raw.githubusercontent.com/rchh/csgo-radars/master/cs2/${radarData.map}/radar.png`;
+  // We can use a raw github repo for radar images:
+  const radarImageUrl = `https://raw.githubusercontent.com/CSGO-Analysis/csgo-maps-overviews/master/overviews/${radarData.map}_radar.png`;
 
   return (
     <div className="radar-container">
