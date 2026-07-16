@@ -76,6 +76,13 @@ function App() {
         setConnected(true);
         setConnecting(false);
         setError('');
+        
+        // Setup keep-alive ping to prevent Ngrok/Mongoose from dropping idle connections
+        ws.pingInterval = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send("ping");
+          }
+        }, 15000);
       };
 
       ws.onmessage = (event) => {
@@ -93,6 +100,7 @@ function App() {
       };
 
       ws.onclose = () => {
+        if (ws.pingInterval) clearInterval(ws.pingInterval);
         setConnected(false);
         setConnecting(false);
         setError("Disconnected from server.");
@@ -106,7 +114,10 @@ function App() {
   };
 
   const handleDisconnect = () => {
-    if (wsRef.current) wsRef.current.close();
+    if (wsRef.current) {
+      if (wsRef.current.pingInterval) clearInterval(wsRef.current.pingInterval);
+      wsRef.current.close();
+    }
   };
 
   // Convert game coordinates to radar pixel percentages (0% to 100%)
