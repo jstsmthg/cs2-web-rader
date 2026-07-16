@@ -202,6 +202,7 @@ function App() {
             return (
               <div key={`tm-${idx}`} className="dot teammate" style={{ left: pos.left, top: pos.top }}>
                 <div className="hp-bar-bg"><div className="hp-bar-fg" style={{height: `${player.hp}%`}}></div></div>
+                <div className="view-cone" style={{ transform: `rotate(${-player.yaw - 90}deg)` }}></div>
               </div>
             );
           })}
@@ -213,7 +214,7 @@ function App() {
               top: getRadarCoords(radarData.local.x, radarData.local.y).top 
             }}>
               <div className="hp-bar-bg"><div className="hp-bar-fg" style={{height: `${radarData.local.hp}%`}}></div></div>
-              <div className="view-cone" style={{ transform: `rotate(${-radarData.local.yaw + 90}deg)` }}></div>
+              <div className="view-cone" style={{ transform: `rotate(${-radarData.local.yaw - 90}deg)` }}></div>
             </div>
           )}
 
@@ -223,6 +224,7 @@ function App() {
             return (
               <div key={`en-${idx}`} className="dot enemy" style={{ left: pos.left, top: pos.top }}>
                 <div className="hp-bar-bg"><div className="hp-bar-fg" style={{height: `${player.hp}%`}}></div></div>
+                <div className="view-cone" style={{ transform: `rotate(${-player.yaw - 90}deg)` }}></div>
               </div>
             );
           })}
