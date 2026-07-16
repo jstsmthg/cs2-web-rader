@@ -5,7 +5,7 @@ import './App.css'
 // CS:GO/CS2 map coordinates require scaling to fit 2D images.
 // Format: mapName: { scale: number, x: number, y: number }
 const MAP_CONFIGS = {
-  de_mirage: { scale: 5, x: -3230, y: 1713 },
+  de_dust2: { scale: 5, x: -3230, y: 1713 },
   de_dust2: { scale: 4.4, x: -2400, y: 3383 },
   de_inferno: { scale: 4.9, x: -2087, y: 3870 },
   default: { scale: 5, x: 0, y: 0 }
@@ -19,7 +19,7 @@ function App() {
   const [error, setError] = useState('');
   
   const [radarData, setRadarData] = useState({
-    map: 'de_mirage',
+    map: 'de_dust2',
     local: {},
     teammates: [],
     enemies: [],
