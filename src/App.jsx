@@ -247,7 +247,7 @@ function App() {
             {error && <div className="error-box">{error}</div>}
 
             <button type="submit" disabled={connecting} className="connect-btn">
-              {connecting ? "Connecting..." : "Connect"}
+              {connecting ? "Connecting to Radar..." : "Connect to Live Radar"}
             </button>
           </form>
         </div>
