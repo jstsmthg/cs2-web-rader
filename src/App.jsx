@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import AdminPanel from './AdminPanel.jsx'
 import './App.css'
 
 // Map scaling configurations (you will need to tune these for precise radar matching)
@@ -31,7 +30,6 @@ const MAP_CONFIGS = {
 };
 
 function App() {
-  const [view, setView] = useState('radar'); // 'radar' or 'admin'
   const [wsUrl, setWsUrl] = useState('127.0.0.1:8090');
   const [pin, setPin] = useState('');
   const [connected, setConnected] = useState(false);
@@ -215,32 +213,11 @@ function App() {
     };
   };
 
-  if (view === 'admin') {
-    return <AdminPanel onBack={() => setView('radar')} />;
-  }
-
   if (!connected) {
     return (
       <div className="login-container">
         <div className="glass-panel login-box">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h1 className="title" style={{ margin: 0 }}>CS2 Web Radar</h1>
-            <button 
-              type="button" 
-              onClick={() => setView('admin')}
-              style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#aaa',
-                borderRadius: '6px',
-                padding: '4px 10px',
-                fontSize: '0.78rem',
-                cursor: 'pointer'
-              }}
-            >
-              Admin Portal
-            </button>
-          </div>
+          <h1 className="title">CS2 Web Radar</h1>
           <p className="subtitle">Connect to your friend's radar</p>
           
           <form onSubmit={handleConnect}>
@@ -283,14 +260,9 @@ function App() {
   return (
     <div className="radar-container">
       <div className="radar-header glass-panel">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div className="status-indicator online"></div>
-          <span>Live Radar - {radarData.map || "Unknown Map"}</span>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="nav-btn" onClick={() => setView('admin')}>Admin Portal</button>
-          <button className="disconnect-btn" onClick={handleDisconnect}>Disconnect</button>
-        </div>
+        <div className="status-indicator online"></div>
+        <span>Live Radar - {radarData.map || "Unknown Map"}</span>
+        <button className="disconnect-btn" onClick={handleDisconnect}>Disconnect</button>
       </div>
 
       <div className="radar-wrapper">
