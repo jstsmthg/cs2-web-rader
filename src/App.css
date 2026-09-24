@@ -198,15 +198,21 @@ body {
   align-items: center;
   position: relative;
   overflow: hidden;
+  background-image: 
+    radial-gradient(circle, rgba(0, 212, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px, 64px 64px, 64px 64px;
 }
 
 .radar-map {
   width: 100%;
   max-width: 1024px;
   aspect-ratio: 1 / 1;
-  background-size: cover;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   background-position: center;
-  background-color: #111; /* Fallback */
+  background-color: #0c1017;
   border-radius: 12px;
   position: relative;
   box-shadow: 0 10px 40px rgba(0,0,0,0.5);
@@ -253,6 +259,30 @@ body {
   z-index: 30;
 }
 
+.dot.bomb.planted {
+  background: #ff4757;
+  animation: bomb-planted-anim 0.6s infinite alternate;
+}
+
+.dot.bomb.dropped {
+  background: #ffa502;
+  animation: pulse-anim 1s infinite;
+}
+
+.dot.bomb.carried {
+  background: #ffa502;
+  width: 15px;
+  height: 15px;
+  font-size: 7px;
+  transform: translate(-50%, -150%); /* Float neatly above carrier's head */
+  box-shadow: 0 0 8px rgba(255, 165, 2, 0.8);
+}
+
+@keyframes bomb-planted-anim {
+  0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.9); transform: translate(-50%, -50%) scale(1); }
+  100% { box-shadow: 0 0 14px 6px rgba(255, 71, 87, 0.8); transform: translate(-50%, -50%) scale(1.2); }
+}
+
 .pulse {
   animation: pulse-anim 1s infinite;
 }
@@ -263,19 +293,27 @@ body {
   100% { box-shadow: 0 0 0 0 rgba(255, 165, 2, 0); }
 }
 
-/* View Cone */
+/* View Cone (Precision Centered SVG) */
 .view-cone {
   position: absolute;
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-bottom: 40px solid rgba(255, 255, 255, 0.2);
+  width: 70px;
+  height: 70px;
   top: 50%;
   left: 50%;
-  transform-origin: top center;
+  transform-origin: 50% 50%;
   pointer-events: none;
-  transition: transform 0.1s linear;
+  z-index: -1;
+  overflow: visible;
+  transition: transform 0.08s linear;
+}
+
+.view-cone.teammate path,
+.view-cone.local path {
+  fill: rgba(0, 212, 255, 0.32);
+}
+
+.view-cone.enemy path {
+  fill: rgba(255, 71, 87, 0.32);
 }
 
 /* Health Bar */

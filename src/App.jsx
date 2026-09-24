@@ -14,20 +14,23 @@ const MAP_CONFIGS = {
   de_ancient: { scale: 5, x: -2953, y: 2164 },
   de_anubis: { scale: 5.22, x: -2796, y: 3328 },
   de_brewery: { scale: 2.1820312, x: -4122.4, y: 4394.4 },
+  de_cache: { scale: 5.5, x: -2000, y: 3250 },
   de_dust2: { scale: 4.4, x: -2476, y: 3239 },
   de_grail: { scale: 2.1756864, x: -4395.903, y: 4203.903 },
   de_inferno: { scale: 4.9, x: -2087, y: 3870 },
   de_jura: { scale: 2.504188, x: -2126.9092, y: 2389.8 },
+  de_mills: { scale: 4.5, x: -2500, y: 2000 },
   de_mirage: { scale: 5, x: -3230, y: 1713 },
   de_nuke: { scale: 7, x: -3453, y: 2887 },
   de_overpass: { scale: 5.2, x: -4831, y: 1781 },
+  de_thera: { scale: 4.8, x: -3000, y: 2000 },
   de_train: { scale: 4.082077, x: -2308, y: 2078 },
   de_vertigo: { scale: 4, x: -3168, y: 1762 },
   default: { scale: 5, x: 0, y: 0 }
 };
 
 function App() {
-  const [wsUrl, setWsUrl] = useState('127.0.0.1:8080');
+  const [wsUrl, setWsUrl] = useState('127.0.0.1:8090');
   const [pin, setPin] = useState('');
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -40,22 +43,16 @@ function App() {
     enemies: [],
     bomb: null
   });
+  const [mapImgUrl, setMapImgUrl] = useState('');
 
   const wsRef = useRef(null);
 
-  useEffect(() => {
-    return () => {
-      if (wsRef.current) wsRef.current.close();
-    };
-  }, []);
-
-  const handleConnect = (e) => {
-    e.preventDefault();
-    if (connecting) return;
+  const connectToRadar = (rawUrl, rawPin) => {
+    if (!rawUrl || !rawPin) return;
     setConnecting(true);
     setError('');
 
-    let url = wsUrl.trim();
+    let url = rawUrl.trim();
     
     // Strip http:// or https:// and replace with ws:// or wss://
     if (url.startsWith('http://')) {
@@ -63,8 +60,8 @@ function App() {
     } else if (url.startsWith('https://')) {
       url = url.replace('https://', 'wss://');
     } else if (!url.startsWith('ws://') && !url.startsWith('wss://')) {
-      // If it's a raw ngrok URL without protocol, we should use wss:// for ngrok
-      if (url.includes('ngrok-free.app') || url.includes('ngrok.app') || url.includes('ngrok.io')) {
+      // If it's a remote URL (like ngrok or external domain), use wss:// for secure WebSockets
+      if (url.includes('ngrok-free.app') || url.includes('ngrok.app') || url.includes('ngrok.io') || (!url.includes('localhost') && !url.includes('127.0.0.1'))) {
         url = 'wss://' + url;
       } else {
         url = 'ws://' + url;
@@ -82,9 +79,13 @@ function App() {
     }
     
     // Add PIN to query string
-    url += `?pin=${pin}`;
+    url += `?pin=${rawPin.trim()}`;
 
     try {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+
       const ws = new WebSocket(url);
       
       ws.onopen = () => {
@@ -126,6 +127,66 @@ function App() {
       setError("Invalid WebSocket URL.");
       setConnecting(false);
     }
+  };
+
+  useEffect(() => {
+    // Check URL query parameters for one-click share: ?host=...&pin=... or ?url=...&pin=...
+    const params = new URLSearchParams(window.location.search);
+    const queryHost = params.get('host') || params.get('url');
+    const queryPin = params.get('pin');
+
+    if (queryHost) setWsUrl(queryHost);
+    if (queryPin) setPin(queryPin);
+
+    if (queryHost && queryPin) {
+      connectToRadar(queryHost, queryPin);
+    }
+
+    return () => {
+      if (wsRef.current) wsRef.current.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!radarData.map) return;
+
+    const candidateUrls = [
+      radarData.map === 'de_cache'
+        ? 'https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/radars/de_cache_radar_psd.png'
+        : `https://raw.githubusercontent.com/2mlml/cs2-radar-images/master/${radarData.map}.png`,
+      `https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/radars/${radarData.map}_radar_psd.png`,
+      `https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/radars/${radarData.map}_radar_tga.png`,
+      `https://raw.githubusercontent.com/2mlml/cs2-radar-images/master/${radarData.map}.png`
+    ];
+
+    let currentIdx = 0;
+    let isCancelled = false;
+
+    const tryNext = () => {
+      if (isCancelled) return;
+      if (currentIdx >= candidateUrls.length) {
+        return;
+      }
+      const testUrl = candidateUrls[currentIdx++];
+      const img = new Image();
+      img.src = testUrl;
+      img.onload = () => {
+        if (!isCancelled) setMapImgUrl(testUrl);
+      };
+      img.onerror = tryNext;
+    };
+
+    tryNext();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [radarData.map]);
+
+  const handleConnect = (e) => {
+    e.preventDefault();
+    if (connecting) return;
+    connectToRadar(wsUrl, pin);
   };
 
   const handleDisconnect = () => {
@@ -196,10 +257,6 @@ function App() {
 
   // --- Radar View ---
 
-  // Check if map image exists, otherwise fallback to generic
-  // We can use a raw github repo for radar images:
-  const radarImageUrl = `https://raw.githubusercontent.com/2mlml/cs2-radar-images/master/${radarData.map}.png`;
-
   return (
     <div className="radar-container">
       <div className="radar-header glass-panel">
@@ -209,7 +266,7 @@ function App() {
       </div>
 
       <div className="radar-wrapper">
-        <div className="radar-map" style={{ backgroundImage: `url(${radarImageUrl})` }}>
+        <div className="radar-map" style={{ backgroundImage: mapImgUrl ? `url("${mapImgUrl}")` : undefined }}>
           
           {/* Teammates (Blue) */}
           {radarData.teammates && radarData.teammates.map((player, idx) => {
@@ -217,7 +274,9 @@ function App() {
             return (
               <div key={`tm-${idx}`} className="dot teammate" style={{ left: pos.left, top: pos.top }}>
                 <div className="hp-bar-bg"><div className="hp-bar-fg" style={{height: `${player.hp}%`}}></div></div>
-                <div className="view-cone" style={{ transform: `rotate(${-player.yaw - 90}deg)` }}></div>
+                <svg className="view-cone teammate" viewBox="0 0 100 100" style={{ transform: `translate(-50%, -50%) rotate(${90 - (player.yaw || 0)}deg)` }}>
+                  <path d="M 50 50 L 32.8 8.4 A 45 45 0 0 1 67.2 8.4 Z" />
+                </svg>
               </div>
             );
           })}
@@ -229,7 +288,9 @@ function App() {
               top: getRadarCoords(radarData.local.x, radarData.local.y).top 
             }}>
               <div className="hp-bar-bg"><div className="hp-bar-fg" style={{height: `${radarData.local.hp}%`}}></div></div>
-              <div className="view-cone" style={{ transform: `rotate(${-radarData.local.yaw - 90}deg)` }}></div>
+              <svg className="view-cone local" viewBox="0 0 100 100" style={{ transform: `translate(-50%, -50%) rotate(${90 - (radarData.local.yaw || 0)}deg)` }}>
+                <path d="M 50 50 L 32.8 8.4 A 45 45 0 0 1 67.2 8.4 Z" />
+              </svg>
             </div>
           )}
 
@@ -239,17 +300,23 @@ function App() {
             return (
               <div key={`en-${idx}`} className="dot enemy" style={{ left: pos.left, top: pos.top }}>
                 <div className="hp-bar-bg"><div className="hp-bar-fg" style={{height: `${player.hp}%`}}></div></div>
-                <div className="view-cone" style={{ transform: `rotate(${-player.yaw - 90}deg)` }}></div>
+                <svg className="view-cone enemy" viewBox="0 0 100 100" style={{ transform: `translate(-50%, -50%) rotate(${90 - (player.yaw || 0)}deg)` }}>
+                  <path d="M 50 50 L 32.8 8.4 A 45 45 0 0 1 67.2 8.4 Z" />
+                </svg>
               </div>
             );
           })}
 
-          {/* Bomb (Orange) */}
+          {/* Bomb (Planted, Dropped, or Carried) */}
           {radarData.bomb && radarData.bomb.state && (
-            <div className="dot bomb pulse" style={{ 
-              left: getRadarCoords(radarData.bomb.x, radarData.bomb.y).left, 
-              top: getRadarCoords(radarData.bomb.x, radarData.bomb.y).top 
-            }}>
+            <div 
+              className={`dot bomb ${radarData.bomb.state}`} 
+              title={`Bomb: ${radarData.bomb.state}`}
+              style={{ 
+                left: getRadarCoords(radarData.bomb.x, radarData.bomb.y).left, 
+                top: getRadarCoords(radarData.bomb.x, radarData.bomb.y).top 
+              }}
+            >
               C4
             </div>
           )}
